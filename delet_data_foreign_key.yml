@@ -1,0 +1,14 @@
+---
+- name: Supprimer la table Utilisateurs
+  hosts: mariadb_servers
+  become: true
+  tasks:
+    - name: Supprimer la table Utilisateurs
+      community.mysql.mysql_db:
+        name: galera_cluster_db
+        state: absent
+        login_user: root
+        login_password: "O2001"
+        login_host: localhost
+        login_port: 3306
+        target: Utilisateurs

@@ -1,0 +1,6 @@
+# vars.yml
+
+mysql_host: 127.0.0.1
+mysql_user: db_mok
+mysql_password: O2001
+mysql_port: 3306

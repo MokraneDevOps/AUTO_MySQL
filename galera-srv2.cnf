@@ -1,0 +1,15 @@
+# galera.cnf.j2
+
+[mysqld]
+bind-address=0.0.0.0
+binlog_format=row
+default-storage-engine=innodb
+innodb_autoinc_lock_mode=2
+innodb_flush_log_at_trx_commit=0
+innodb_buffer_pool_size=256M
+wsrep_on=ON
+wsrep_provider=/usr/lib/galera/libgalera_smm.so
+wsrep_cluster_name="galera_cluster"
+wsrep_cluster_address="gcomm://{{ groups['cluster_nodes'] | join(',') }}"
+wsrep_node_name="{{ inventory_hostname }}"
+wsrep_node_address="{{ hostvars[inventory_hostname].ansible_host }}"

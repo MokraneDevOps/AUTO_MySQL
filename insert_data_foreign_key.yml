@@ -1,0 +1,47 @@
+- name: Insert data and update if exists
+  hosts: mariadb_servers
+  become: true
+  tasks:
+    - name: Insert or update data into Utilisateurs table
+      community.mysql.mysql_query:
+        login_user: root
+        login_password: "O2001"
+        login_db: dbz
+        query: |
+          INSERT INTO Utilisateurs (Id, Nom, Email, Date_inscription)
+          VALUES
+          (1010, 'Yann', 'yann@hotmail.com', '2024-02-05'),
+          (1020, 'David', 'david@hotmail.com', '2024-02-06'),
+          (1030, 'Dorian', 'dorian@hotmail.com', '2024-02-07')
+          ON DUPLICATE KEY UPDATE
+          Nom = VALUES(Nom), Email = VALUES(Email), Date_inscription = VALUES(Date_inscription);
+
+    - name: Insert or update data into Connexions table
+      community.mysql.mysql_query:
+        login_user: root
+        login_password: "O2001"
+        login_db: dbz
+        query: |
+          INSERT INTO Connexions (Utilisateur_id, Timestamp)
+          VALUES
+          (1010, NOW()),
+          (1020, NOW()),
+          (1030, NOW())
+          ON DUPLICATE KEY UPDATE Timestamp = VALUES(Timestamp);
+      ignore_errors: yes  # Ignoring errors due to foreign key constraint violations
+
+    - name: Update existing records in Connexions table
+      community.mysql.mysql_query:
+        login_user: root
+        login_password: "O2001"
+        login_db: dbz
+        query: |
+          UPDATE Connexions
+          SET Timestamp = CASE
+            WHEN Utilisateur_id = 1030 THEN '2024-02-07 12:00:00'
+            WHEN Utilisateur_id = 1010 THEN '2024-02-07 11:00:00'
+            WHEN Utilisateur_id = 1020 THEN '2024-02-07 12:00:00'
+            -- Add other cases if necessary
+            ELSE Timestamp
+          END
+          WHERE Utilisateur_id IN (1030, 1010, 1020);

@@ -1,0 +1,36 @@
+---
+- name: Configure MySQL Backup
+  hosts: galera_cluster_nodes
+  become: yes
+
+  vars:
+    db_user: "votre_utilisateur_mysql"
+    db_password: "votre_mot_de_passe_mysql"
+    db_name: "galera_cluster_db"
+    backup_directory: "/etc/SAVE"
+    backup_script_path: "/etc/SAVE/backup_script.sh"
+    cron_job_name: "MySQL Backup"
+
+  tasks:
+    - name: Create backup directory
+      file:
+        path: "{{ backup_directory }}"
+        state: directory
+        mode: "0755"
+      become: yes
+
+    - name: Create backup script
+      template:
+        src: backup_script.sh.j2
+        dest: "{{ backup_script_path }}"
+        mode: "0755"
+      become: yes
+
+    - name: Schedule backup with cron
+      cron:
+        name: "{{ cron_job_name }}"
+        minute: "*/5"
+        job: "{{ backup_script_path }}"
+      become: yes
+
+

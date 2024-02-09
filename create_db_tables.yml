@@ -1,0 +1,28 @@
+---
+- name: Création Automatisée de Bases de Données et de Tables
+  hosts: mariadb_servers
+  become: true
+  tasks:
+    - name: Créer la base de données dbz
+      community.mysql.mysql_query:
+        login_user: root
+        login_password: "O2001"
+        login_db: mysql
+        query: "CREATE DATABASE IF NOT EXISTS dbz;"
+      register: db_creation_result
+
+    - name: Créer la table Utilisateurs
+      community.mysql.mysql_query:
+        login_user: root
+        login_password: "O2001"
+        login_db: dbz
+        query: "CREATE TABLE IF NOT EXISTS Utilisateurs (Id INT AUTO_INCREMENT PRIMARY KEY, Nom VARCHAR(255), Email VARCHAR(255), Date_inscription DATE);"
+      when: db_creation_result.changed
+
+    - name: Créer la table Connexions
+      community.mysql.mysql_query:
+        login_user: root
+        login_password: "O2001"
+        login_db: dbz
+        query: "CREATE TABLE IF NOT EXISTS Connexions (Connexion_id INT AUTO_INCREMENT PRIMARY KEY, Utilisateur_id INT, Timestamp DATETIME, FOREIGN KEY (Utilisateur_id) REFERENCES Utilisateurs(Id));"
+      when: db_creation_result.changed

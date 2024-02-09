@@ -1,0 +1,17 @@
+# automate_backups.yml
+
+- name: Automate backups with mysqldump and cron
+  hosts: backup_server
+  become: yes
+
+  tasks:
+    - name: Create backup directory
+      file:
+        path: "/etc/SAVE"
+        state: directory
+
+    - name: Schedule mysqldump with cron
+      cron:
+        name: "Backup MySQL database"
+        minute: "*/5"
+        job: "/usr/bin/mysqldump -u <server_4> -p<O2001> -h 192.168.240.13 -B galera_cluster_db > /etc/SAVE/{{ ansible_hostname }}_backup.sql"

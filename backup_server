@@ -1,0 +1,2 @@
+[backup_server]
+192.168.240.13 ansible_user=server_4 ansible_ssh_private_key_file=/path/to/your/private/key

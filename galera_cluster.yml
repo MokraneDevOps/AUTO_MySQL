@@ -1,0 +1,98 @@
+---
+- name: Installation local
+  hosts: mariadb_servers
+  become: yes
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Upgrade installed packages
+      apt:
+        upgrade: "yes"
+
+    - name: Install MariaDB (MySQL)
+      apt:
+        name: mariadb-server
+        state: present
+
+    - name: start mariadb
+      systemd:
+        name: mariadb
+        state: started
+        enabled: yes
+        daemon-reload: yes
+
+- name: galera copy srv2
+  hosts: srv2
+  become: yes
+  tasks:
+    - name: module copy
+      copy:
+        src: galera-srv2.cnf
+        dest: /etc/mysql/conf.d/galera.cnf
+
+- name: copy srv2
+  hosts: srv3
+  become: yes
+  tasks:
+    - name: module copy
+      copy:
+        src: galera-srv2.cnf
+        dest: /etc/mysql/conf.d/galera.cnf
+
+- name: stop tous les noeuds
+  hosts: mariadb_servers
+  become: yes
+  tasks:
+    - name: stop mariadb
+      systemd:
+        name: mariadb
+        state: stopped
+
+- name: initialisez le cluster MariaDB Galera Noeud1
+  hosts: srv2
+  become: yes
+  tasks:
+    - name: Run shell command
+      shell: galera_new_cluster
+
+- name: Start MariaDB service on Noeud1
+  hosts: srv2
+  become: yes
+  tasks:
+    - name: start mariadb
+      systemd:
+        name: mariadb
+        state: started
+        enabled: yes
+        daemon-reload: yes
+
+- name: initialisez le cluster MariaDB Galera Noeud2
+  hosts: srv3
+  become: yes
+  tasks:
+    - name: Run shell command
+      shell: galera_new_cluster
+
+- name: Start MariaDB service on Noeud2
+  hosts: srv3
+  become: yes
+  tasks:
+    - name: start mariadb
+      systemd:
+        name: mariadb
+        state: started
+        enabled: yes
+        daemon-reload: yes
+
+- name: Schedule backup task on backup server
+  hosts: backup_server
+  become: yes
+  tasks:
+    - name: Schedule backup task
+      cron:
+        name: "Backup Task"
+        minute: "*/5"
+        job: "/path/to/backup_script.sh"  # Replace this with the actual path to your backup script
